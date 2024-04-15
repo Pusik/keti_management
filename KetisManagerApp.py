@@ -1,3 +1,4 @@
+import os
 import sys
 import re
 import openpyxl
@@ -5,30 +6,43 @@ from typing import List
 from os import listdir
 from os.path import isfile, join
 from datetime import date, timedelta
-from ProjectBudget import KetiManager
-from Contract import KetiManager
-from Employee import KetiManager
-
+from KetiManager import *
 
 TargetYear = 2023
 TargetYearBegin = date(TargetYear, 1, 1)
 TargetYearEnd = date(TargetYear, 12, 31)
 
-
-# Define the working folder
-#WorkingFolder = "C:/Users/ParkPusik/OneDrive - OPENLAB/MOBILITY/____센터장App/20231231"
-#WorkingFolder = sys.argv[1]
-WorkingFolder = "."
+WorkingFolder = ""
 
 FileBudget = "연구_예산관리_예실대비표(4P4C3369)_Button(엑셀).xlsx"
 FileIrregularEmployee = "인사_비상근전문계약직_과제참여현황_Button(엑셀다운).xlsx"
 WholeProjectInfo = "연구_과제현황_과제종합정보_Button(엑셀데이터다운).xlsx"
 
+Projects: List[ProjectBudget] = []  # 과제 예실대비표 정보
+Employees: List[Employee] = []  # 위촉연구원 정보
+
+def func_init():
+    global WorkingFolder
+    WorkingFolder = "." if len(sys.argv) <= 1 else sys.argv[1]
+    #WorkingFolder = "C:/Users/ParkPusik/OneDrive - OPENLAB/MOBILITY/____센터장App/20231231"
+    print("WorkingFolder = '", WorkingFolder, "'")
+
+    global TargetYear
+    global TargetYearBegin
+    global TargetYearEnd
+
+    global FileIrregularEmployee
+    global WholeProjectInfo
+
+    global Projects
+    global Employees
 
 def func_project_budget():
     # List all files in the folder
+
+    
     Files = [f for f in listdir(WorkingFolder) if isfile(join(WorkingFolder, f))]
-    Projects: List[ProjectBudget] = []
+
     for f in Files:
         if f.startswith("연구_예산관리_예실대비표("):
             ##print(f)
@@ -38,59 +52,59 @@ def func_project_budget():
             Projects.append(proj)
 
     # Define the beginning/ending date of the project
-    wb2 = openpyxl.load_workbook(WorkingFolder + "/" + WholeProjectInfo)
-    ws2 = wb2.active
+    wb = openpyxl.load_workbook(WorkingFolder + "/" + WholeProjectInfo)
+    ws = wb.active
 
     offset = 2
     for proj in Projects:
-        for row_idx in range(offset, ws2.max_row):
+        for row_idx in range(offset, ws.max_row):
             '''
-            print("1", ws2.cell(row=row_idx, column=1).value)
-            print("2", ws2.cell(row=row_idx, column=2).value)
-            print("3", ws2.cell(row=row_idx, column=3).value)
-            print("4", ws2.cell(row=row_idx, column=4).value)
-            print("5", ws2.cell(row=row_idx, column=5).value)
-            print("6", ws2.cell(row=row_idx, column=6).value)
-            print("7", ws2.cell(row=row_idx, column=7).value)
-            print("8", ws2.cell(row=row_idx, column=8).value)
+            print("1", ws.cell(row=row_idx, column=1).value)
+            print("2", ws.cell(row=row_idx, column=2).value)
+            print("3", ws.cell(row=row_idx, column=3).value)
+            print("4", ws.cell(row=row_idx, column=4).value)
+            print("5", ws.cell(row=row_idx, column=5).value)
+            print("6", ws.cell(row=row_idx, column=6).value)
+            print("7", ws.cell(row=row_idx, column=7).value)
+            print("8", ws.cell(row=row_idx, column=8).value)
             '''
-            #print(ws2.cell(row=row_idx, column=9).value, proj.project_cur_id)
+            #print(ws.cell(row=row_idx, column=9).value, proj.project_cur_id)
 
-            if ws2.cell(row=row_idx, column=9).value == proj.project_file_id:
+            if ws.cell(row=row_idx, column=9).value == proj.project_file_id:
                 proj.project_cur_id = proj.project_file_id
-                #print("과제시작일", ws2.cell(row=row_idx, column=11).value)
-                #print("과제종료일", ws2.cell(row=row_idx, column=12).value)
-                str_date = ws2.cell(row=row_idx, column=11).value
+                #print("과제시작일", ws.cell(row=row_idx, column=11).value)
+                #print("과제종료일", ws.cell(row=row_idx, column=12).value)
+                str_date = ws.cell(row=row_idx, column=11).value
                 str_date = str_date.replace(".", "")
                 proj.date_begin = date(int(str_date[0:4]), int(str_date[4:6]), int(str_date[6:8]))
 
-                str_date = ws2.cell(row=row_idx, column=12).value
+                str_date = ws.cell(row=row_idx, column=12).value
                 str_date = str_date.replace(".", "")
                 proj.date_end = date(int(str_date[0:4]), int(str_date[4:6]), int(str_date[6:8]))
 
                 # 과제번호
-                proj.project_base_id = ws2.cell(row=row_idx, column=1).value
+                proj.project_base_id = ws.cell(row=row_idx, column=1).value
                 break
         # No match
         #print("No match for ", proj.project_cur_id)
 
-        for row_idx in range(offset, ws2.max_row):
-            #print(ws2.cell(row=row_idx, column=1).value, proj.project_cur_id)
+        for row_idx in range(offset, ws.max_row):
+            #print(ws.cell(row=row_idx, column=1).value, proj.project_cur_id)
 
-            if ws2.cell(row=row_idx, column=1).value == proj.project_file_id:
+            if ws.cell(row=row_idx, column=1).value == proj.project_file_id:
                 proj.project_cur_id = ""
-                #print("과제시작일", ws2.cell(row=row_idx, column=11).value)
-                #print("과제종료일", ws2.cell(row=row_idx, column=12).value)
-                str_date = ws2.cell(row=row_idx, column=11).value
+                #print("과제시작일", ws.cell(row=row_idx, column=11).value)
+                #print("과제종료일", ws.cell(row=row_idx, column=12).value)
+                str_date = ws.cell(row=row_idx, column=11).value
                 str_date = str_date.replace(".", "")
                 proj.date_begin = date(int(str_date[0:4]), int(str_date[4:6]), int(str_date[6:8]))
 
-                str_date = ws2.cell(row=row_idx, column=12).value
+                str_date = ws.cell(row=row_idx, column=12).value
                 str_date = str_date.replace(".", "")
                 proj.date_end = date(int(str_date[0:4]), int(str_date[4:6]), int(str_date[6:8]))
 
                 # 과제번호
-                proj.project_base_id = ws2.cell(row=row_idx, column=1).value
+                proj.project_base_id = ws.cell(row=row_idx, column=1).value
                 break
 
     # Remove the project with 0 months
@@ -166,28 +180,25 @@ def func_project_budget():
 
 def func_employee():
     # Write Projects into a excel file
-    wb3 = openpyxl.Workbook()
-    ws3 = wb3.active
+    wb = openpyxl.Workbook()
+    ws = wb.active
 
-    ws3.append(["과제번호(파일)", "과제번호", "계정번호", "과제시작일", "과제종료일", "월수", "월수({TargetYear})", "내부인건비", "계약직내부인건비", "간접비", "내부인건비{0}".format(TargetYear), "계약직내부인건비{0}".format(TargetYear), "간접비{0}".format(TargetYear)])
+    ws.append(["과제번호(파일)", "과제번호", "계정번호", "과제시작일", "과제종료일", "월수", "월수({TargetYear})", "내부인건비", "계약직내부인건비", "간접비", "내부인건비{0}".format(TargetYear), "계약직내부인건비{0}".format(TargetYear), "간접비{0}".format(TargetYear)])
     for proj in Projects:
-        ws3.append([proj.project_file_id, proj.project_base_id, proj.project_cur_id, proj.date_begin, proj.date_end, proj.months, proj.months_target, proj.expenses_internal, proj.expenses_external, proj.expenses_overhead, proj.expenses_internal_target, proj.expenses_external_target, proj.expenses_overhead_target])   
+        ws.append([proj.project_file_id, proj.project_base_id, proj.project_cur_id, proj.date_begin, proj.date_end, proj.months, proj.months_target, proj.expenses_internal, proj.expenses_external, proj.expenses_overhead, proj.expenses_internal_target, proj.expenses_external_target, proj.expenses_overhead_target])   
 
-    wb3.save(WorkingFolder + "/Summary_Projects" + str(TargetYear) + ".xlsx")
+    wb.save(WorkingFolder + "/Summary_Projects" + str(TargetYear) + ".xlsx")
     print("Summary_Projects" + str(TargetYear) + ".xlsx is saved")
 
-    wb2.close()
-    wb3.close()
+    wb.close()
 
 
     # Write Projects into a excel file
-    wb4 = openpyxl.load_workbook(WorkingFolder + "/" + FileIrregularEmployee)
-    ws4 = wb4.active
-
-    Employees: List[Employee] = []
+    wb = openpyxl.load_workbook(WorkingFolder + "/" + FileIrregularEmployee)
+    ws = wb.active
 
     offset = 3
-    for row_idx in range(offset, ws4.max_row):
+    for row_idx in range(offset, ws.max_row):
         '''
         print("1", ws4.cell(row=row_idx+offset, column=1).value)
         print("2", ws4.cell(row=row_idx+offset, column=2).value)
@@ -205,30 +216,30 @@ def func_employee():
         print("14", ws4.cell(row=row_idx+offset, column=14).value)
         print("15", ws4.cell(row=row_idx+offset, column=15).value)
         '''
-        id = ws4.cell(row=row_idx, column=3).value
+        id = ws.cell(row=row_idx, column=3).value
         if id == None:
             continue
-        name = ws4.cell(row=row_idx, column=4).value
+        name = ws.cell(row=row_idx, column=4).value
         if name == None:
             continue
-        project_id = ws4.cell(row=row_idx, column=6).value
+        project_id = ws.cell(row=row_idx, column=6).value
         if project_id == None:
             continue
-        str_date = ws4.cell(row=row_idx, column=8).value
+        str_date = ws.cell(row=row_idx, column=8).value
         if str_date == None or str_date == "____.__.__" or str_date == "________" or str_date == "":
             continue
         str_date = str_date.replace(".", "")
         date_begin = date(int(str_date[0:4]), int(str_date[4:6]), int(str_date[6:8]))
-        str_date = ws4.cell(row=row_idx, column=9).value
+        str_date = ws.cell(row=row_idx, column=9).value
         if str_date == None or str_date == "____.__.__" or str_date == "________" or str_date == "":
             continue
         str_date = str_date.replace(".", "")
         date_end = date(int(str_date[0:4]), int(str_date[4:6]), int(str_date[6:8]))
-        working_time = ws4.cell(row=row_idx, column=11).value
-        expenses_per_hour = ws4.cell(row=row_idx, column=12).value
-        expenses_holiday = ws4.cell(row=row_idx, column=13).value
-        expenses_monthly = ws4.cell(row=row_idx, column=14).value
-        expenses_extra = ws4.cell(row=row_idx, column=15).value
+        working_time = ws.cell(row=row_idx, column=11).value
+        expenses_per_hour = ws.cell(row=row_idx, column=12).value
+        expenses_holiday = ws.cell(row=row_idx, column=13).value
+        expenses_monthly = ws.cell(row=row_idx, column=14).value
+        expenses_extra = ws.cell(row=row_idx, column=15).value
 
         contract = Contract(id, name, project_id, date_begin, date_end, working_time, expenses_per_hour, expenses_holiday, expenses_monthly, expenses_extra)
 
@@ -250,16 +261,21 @@ def func_employee():
     print("Total employees", len(Employees))
 
 
-for employee in Employees:
-    employee.show()
+    for employee in Employees:
+        employee.show()
 
-wb4.close()
+    wb.close()
 
 
 def main():
-    #func_project_budget()
+    print("Hello, KetiManagerApp")
 
-    #func_employee()
+    func_init()
+    #print("Current working directory:", os.getcwd())
+    #print("Python path:", sys.path) 
 
-if __name__ == "__main__":
-    main()
+    func_project_budget()
+
+    func_employee()
+
+main()
