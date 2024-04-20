@@ -8,7 +8,7 @@ from os.path import isfile, join
 from datetime import date, timedelta
 from KetiManager import *
 
-TargetYear = 2023
+TargetYear = 2024
 TargetYearBegin = date(TargetYear, 1, 1)
 TargetYearEnd = date(TargetYear, 12, 31)
 
@@ -47,7 +47,7 @@ def func_project_budget():
         if f.startswith("연구_예산관리_예실대비표("):
             ##print(f)
             
-            proj = ProjectBudget(WorkingFolder + "/" + f)
+            proj = ProjectBudget(TargetYear, WorkingFolder + "/" + f)
             
             Projects.append(proj)
 
@@ -241,7 +241,7 @@ def func_employee():
         expenses_monthly = ws.cell(row=row_idx, column=14).value
         expenses_extra = ws.cell(row=row_idx, column=15).value
 
-        contract = Contract(id, name, project_id, date_begin, date_end, working_time, expenses_per_hour, expenses_holiday, expenses_monthly, expenses_extra)
+        contract = Contract(TargetYear, id, name, project_id, date_begin, date_end, working_time, expenses_per_hour, expenses_monthly, expenses_holiday, expenses_extra)
 
         # Find the employee
         found = False
