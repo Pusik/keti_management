@@ -25,7 +25,10 @@ def func_init():
     global WorkingFolder
     WorkingFolder = "." if len(sys.argv) <= 1 else sys.argv[1]
     #WorkingFolder = "C:/Users/ParkPusik/OneDrive - OPENLAB/MOBILITY/____센터장App/20231231"
+    print("os.getcwd():", os.getcwd())
     print("WorkingFolder = '", WorkingFolder, "'")
+    os.chdir(WorkingFolder)
+    print("os.getcwd():", os.getcwd())
 
     global TargetYear
     global TargetYearBegin
@@ -76,7 +79,7 @@ def func_project_budget():
                 #print("과제종료일", ws.cell(row=row_idx, column=12).value)
                 str_date = ws.cell(row=row_idx, column=11).value
                 str_date = str_date.replace(".", "")
-                proj.date_begin = date(int(str_date[0:4]), int(str_date[4:6]), int(str_date[6:8]))
+                proj.date_start = date(int(str_date[0:4]), int(str_date[4:6]), int(str_date[6:8]))
 
                 str_date = ws.cell(row=row_idx, column=12).value
                 str_date = str_date.replace(".", "")
@@ -97,7 +100,7 @@ def func_project_budget():
                 #print("과제종료일", ws.cell(row=row_idx, column=12).value)
                 str_date = ws.cell(row=row_idx, column=11).value
                 str_date = str_date.replace(".", "")
-                proj.date_begin = date(int(str_date[0:4]), int(str_date[4:6]), int(str_date[6:8]))
+                proj.date_start = date(int(str_date[0:4]), int(str_date[4:6]), int(str_date[6:8]))
 
                 str_date = ws.cell(row=row_idx, column=12).value
                 str_date = str_date.replace(".", "")
@@ -109,8 +112,8 @@ def func_project_budget():
 
     # Remove the project with 0 months
     for proj in Projects:
-        # Calculate the month from the date_begin to date_end
-        diff = proj.date_end - proj.date_begin
+        # Calculate the month from the date_start to date_end
+        diff = proj.date_end - proj.date_start
         months = int(diff.days / 30)
         if months == 0:
             Projects.remove(proj)
@@ -119,33 +122,33 @@ def func_project_budget():
 
     # Remove the project out of the target year
     for proj in Projects:
-        if proj.date_end < TargetYearBegin or proj.date_begin > TargetYearEnd:
-            #print("Out of range", proj.project_base_id, proj.date_begin, proj.date_end)
+        if proj.date_end < TargetYearBegin or proj.date_start > TargetYearEnd:
+            #print("Out of range", proj.project_base_id, proj.date_start, proj.date_end)
             Projects.remove(proj)
 
-    # Calculate the monthly expenses
+    # Calculate the monthly expense
     for proj in Projects:
-        monthly_expenses_internal = int(proj.expenses_internal / proj.months)
-        monthly_expenses_external = int(proj.expenses_external / proj.months)
-        monthly_expenses_overhead = int(proj.expenses_overhead / proj.months)
+        monthly_expense_internal = int(proj.expense_internal / proj.months)
+        monthly_expense_external = int(proj.expense_external / proj.months)
+        monthly_expense_overhead = int(proj.expense_overhead / proj.months)
 
-        if proj.date_begin <= TargetYearBegin and proj.date_end <= TargetYearEnd:
+        if proj.date_start <= TargetYearBegin and proj.date_end <= TargetYearEnd:
             diff = proj.date_end - TargetYearBegin
             proj.months_target = int(diff.days / 30)
-        elif proj.date_begin <= TargetYearBegin and proj.date_end >= TargetYearEnd:  
+        elif proj.date_start <= TargetYearBegin and proj.date_end >= TargetYearEnd:  
             proj.months_target = 12
-        elif proj.date_begin >= TargetYearBegin and proj.date_end >= TargetYearEnd:
-            diff = TargetYearEnd - proj.date_begin
+        elif proj.date_start >= TargetYearBegin and proj.date_end >= TargetYearEnd:
+            diff = TargetYearEnd - proj.date_start
             proj.months_target = int(diff.days / 30)   
-        elif proj.date_begin >= TargetYearBegin and proj.date_end <= TargetYearEnd:
-            diff = proj.date_end - proj.date_begin
+        elif proj.date_start >= TargetYearBegin and proj.date_end <= TargetYearEnd:
+            diff = proj.date_end - proj.date_start
             proj.months_target = int(diff.days / 30)
         else:
-            print("Error", proj.project_cur_id, proj.date_begin, proj.date_end)
+            print("Error", proj.project_cur_id, proj.date_start, proj.date_end)
 
-        proj.expenses_internal_target = monthly_expenses_internal * proj.months_target
-        proj.expenses_external_target = monthly_expenses_external * proj.months_target
-        proj.expenses_overhead_target = monthly_expenses_overhead * proj.months_target
+        proj.expense_internal_target = monthly_expense_internal * proj.months_target
+        proj.expense_external_target = monthly_expense_external * proj.months_target
+        proj.expense_overhead_target = monthly_expense_overhead * proj.months_target
 
 
     #for proj in Projects:
@@ -161,21 +164,21 @@ def func_project_budget():
     #print("Total", len(Projects), "Duplication: ", dup)
 
     # Summary of projects
-    total_expenses_internal_target = 0
-    total_expenses_external_target = 0
-    total_expenses_overhead_target = 0
+    total_expense_internal_target = 0
+    total_expense_external_target = 0
+    total_expense_overhead_target = 0
 
     for proj in Projects:
-        # Acculmulate the expenses and overhead
-        total_expenses_internal_target += proj.expenses_internal_target
-        total_expenses_external_target += proj.expenses_external_target
-        total_expenses_overhead_target += proj.expenses_overhead_target
+        # Acculmulate the expense and overhead
+        total_expense_internal_target += proj.expense_internal_target
+        total_expense_external_target += proj.expense_external_target
+        total_expense_overhead_target += proj.expense_overhead_target
 
     # Format comma separated number
-    print("Total 내부인건비: ", "{:,}".format(total_expenses_internal_target))
-    print("Total 계약직내부인건비: ", "{:,}".format(total_expenses_external_target))
-    print("Total 간접비: ", "{:,}".format(total_expenses_overhead_target))
-    print("Total OH", "{:,}".format(total_expenses_internal_target + total_expenses_overhead_target))
+    print("Total 내부인건비: ", "{:,}".format(total_expense_internal_target))
+    print("Total 계약직내부인건비: ", "{:,}".format(total_expense_external_target))
+    print("Total 간접비: ", "{:,}".format(total_expense_overhead_target))
+    print("Total OH", "{:,}".format(total_expense_internal_target + total_expense_overhead_target))
 
 
 def func_employee():
@@ -185,7 +188,7 @@ def func_employee():
 
     ws.append(["과제번호(파일)", "과제번호", "계정번호", "과제시작일", "과제종료일", "월수", "월수({TargetYear})", "내부인건비", "계약직내부인건비", "간접비", "내부인건비{0}".format(TargetYear), "계약직내부인건비{0}".format(TargetYear), "간접비{0}".format(TargetYear)])
     for proj in Projects:
-        ws.append([proj.project_file_id, proj.project_base_id, proj.project_cur_id, proj.date_begin, proj.date_end, proj.months, proj.months_target, proj.expenses_internal, proj.expenses_external, proj.expenses_overhead, proj.expenses_internal_target, proj.expenses_external_target, proj.expenses_overhead_target])   
+        ws.append([proj.project_file_id, proj.project_base_id, proj.project_cur_id, proj.date_start, proj.date_end, proj.months, proj.months_target, proj.expense_internal, proj.expense_external, proj.expense_overhead, proj.expense_internal_target, proj.expense_external_target, proj.expense_overhead_target])   
 
     wb.save(WorkingFolder + "/Summary_Projects" + str(TargetYear) + ".xlsx")
     print("Summary_Projects" + str(TargetYear) + ".xlsx is saved")
@@ -225,23 +228,23 @@ def func_employee():
         project_id = ws.cell(row=row_idx, column=6).value
         if project_id == None:
             continue
-        str_date = ws.cell(row=row_idx, column=8).value
+        str_date = ws.cell(row=row_idx, column=9).value
         if str_date == None or str_date == "____.__.__" or str_date == "________" or str_date == "":
             continue
         str_date = str_date.replace(".", "")
-        date_begin = date(int(str_date[0:4]), int(str_date[4:6]), int(str_date[6:8]))
-        str_date = ws.cell(row=row_idx, column=9).value
+        date_start = date(int(str_date[0:4]), int(str_date[4:6]), int(str_date[6:8]))
+        str_date = ws.cell(row=row_idx, column=10).value
         if str_date == None or str_date == "____.__.__" or str_date == "________" or str_date == "":
             continue
         str_date = str_date.replace(".", "")
         date_end = date(int(str_date[0:4]), int(str_date[4:6]), int(str_date[6:8]))
         working_time = ws.cell(row=row_idx, column=11).value
-        expenses_per_hour = ws.cell(row=row_idx, column=12).value
-        expenses_holiday = ws.cell(row=row_idx, column=13).value
-        expenses_monthly = ws.cell(row=row_idx, column=14).value
-        expenses_extra = ws.cell(row=row_idx, column=15).value
+        expense_per_hour = ws.cell(row=row_idx, column=12).value
+        expense_holiday = ws.cell(row=row_idx, column=13).value
+        expense_monthly = ws.cell(row=row_idx, column=14).value
+        expense_extra = ws.cell(row=row_idx, column=15).value
 
-        contract = Contract(TargetYear, id, name, project_id, date_begin, date_end, working_time, expenses_per_hour, expenses_monthly, expenses_holiday, expenses_extra)
+        contract = Contract(TargetYear, id, name, project_id, date_start, date_end, working_time, expense_per_hour, expense_monthly, expense_holiday, expense_extra)
 
         # Find the employee
         found = False
@@ -254,7 +257,7 @@ def func_employee():
         if not found:
             print("New id and new contract", id, name)
 
-            employee = Employee(id, name)
+            employee = Employee(TargetYear, id, name)
             employee.add(contract)
             Employees.append(employee)
 
@@ -274,7 +277,7 @@ def main():
     #print("Current working directory:", os.getcwd())
     #print("Python path:", sys.path) 
 
-    func_project_budget()
+    #func_project_budget()
 
     func_employee()
 
