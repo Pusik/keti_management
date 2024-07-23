@@ -147,7 +147,7 @@ class ProjectBudget:
 
 
 budgets: List[ProjectBudget] = []
-employyes: List[Employee] = []
+employees: List[Employee] = []
 TeamA = Team("모쏠")
 TeamB = Team("자율")
 TeamC = Team("통신")
@@ -174,7 +174,7 @@ def func_sum_budgets():
     for b in budgets:
         # Search the name in the employee list
         found = False
-        for e in employyes:
+        for e in employees:
             if b.name == e.name:
                 found = True
                 break
@@ -187,7 +187,7 @@ def func_sum_budgets():
             new_employee.total_salary_irregular = b.salary_irregular
             new_employee.total_income_indirect = b.income_indirect
             
-            employyes.append(new_employee)
+            employees.append(new_employee)
         else:  
             e.total_cost_oversee_trip += b.cost_oversee_trip
             e.total_cost_meeting += b.cost_meeting
@@ -196,7 +196,7 @@ def func_sum_budgets():
             e.total_income_indirect += b.income_indirect
 
     # Team별로 합산
-    for e in employyes:
+    for e in employees:
         if e.team == "모쏠":
             TeamA.total_cost_oversee_trip += e.total_cost_oversee_trip
             TeamA.total_cost_meeting += e.total_cost_meeting
@@ -228,7 +228,7 @@ def print_budgets():
         print(b.name, b.code, b.cost_oversee_trip, b.cost_meeting)
 
 def print_employees():
-    for e in employyes:
+    for e in employees:
         print(e.name, f"{e.total_cost_oversee_trip:15,}", f"{e.total_cost_meeting:15,}")
     print("---")
 
