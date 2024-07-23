@@ -8,8 +8,8 @@ from os import listdir
 from os.path import isfile, join
 from datetime import date, datetime, timedelta
 
-WorkingFolder = "C:/Users/ParkPusik/OneDrive - OPENLAB/MOBILITY/_참여율&연구수당,외부수당/예실대비표20231231"
-#WorkingFolder = "C:/Users/ParkPusik/OneDrive - OPENLAB/MOBILITY/_참여율&연구수당,외부수당/예실대비표20240723"
+#WorkingFolder = "C:/Users/ParkPusik/OneDrive - OPENLAB/MOBILITY/_참여율&연구수당,외부수당/예실대비표20231231"
+WorkingFolder = "C:/Users/ParkPusik/OneDrive - OPENLAB/MOBILITY/_참여율&연구수당,외부수당/예실대비표20240723"
 
 FilePrefix = "예실대비표 "
 
@@ -257,4 +257,11 @@ def main():
 
     print_teams()
 
+    # sum of total salary regular
+    total_salary_regular = TeamA.total_salary_regular + TeamB.total_salary_regular + TeamC.total_salary_regular + TeamD.total_salary_regular
+    total_income_indirect = TeamA.total_income_indirect + TeamB.total_income_indirect + TeamC.total_income_indirect + TeamD.total_income_indirect
+    total_income = total_salary_regular + total_income_indirect
+    print("인건비흡수:", f"{total_salary_regular:,}", "원, 간접비:", f"{total_income_indirect:,}", "원, 총수익:", f"{total_income:,}")
+    print("")
+    
 main()
